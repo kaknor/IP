@@ -38,20 +38,22 @@ def get_bounds(s, tok):
 
 def get_topo(name, topo):
     tmd = []
-    ntmd = []
+    ntmd = [()]
     for i in range(0, len(topo)):
         if topo[i] == 'o':
             left, right = get_bounds(topo[i + 1:], 'i')
             if (left != '' and right != ''):
                 ntmd.append((int(left), int(right)))
+            else:
+                tmd.append(((tmd[-1][1][1], general_file_data[name][0]), ()))
         if topo[i] == 'i':
             left, right = get_bounds(topo[i + 1:], 'o')
             if (left != '' and right != ''):
-                tmd.append((int(left), int(right)))
+                tmd.append((ntmd[-1], (int(left), int(right))))
             else:
-                print(topo, tmd[-1][1], general_file_data[name][0])
-                tmd.append((tmd[-1][1], general_file_data[name][0]))
-    return (tmd, ntmd)
+#                print(topo, tmd[-1][1], general_file_data[name][0])
+                tmd.append(((ntmd[-1]), (ntmd[-1][1], general_file_data[name][0])))
+    return tmd, ntmd
 
 def get_prot_seq(d_fasta, name, bounds):
     return d_fasta[name][bounds[0]:bounds[1]]
@@ -71,15 +73,17 @@ def create_csv(file_name):
         f.write('[ID]' + '\t' + '[TOPOLOGY]' + '\t' + '[TMD #]' + '\t' + '[TMD protein sequence]' + '\t'
                 + '[NON TMD #]' + '\t' + '[NON TMD protein sequence]\n')
         for i in topology:
-            tmd, ntmd = get_topo(i[0], i[1])
-            for tmdom, ntmdom in zip(tmd, ntmd):
-                form_line(f, d_fasta, i, tmdom, ntmdom)
-            if len(tmd) == len(ntmd):
-                continue
-            if len(tmd) > len(ntmd):
-                form_line(f, d_fasta, i, tmd[-1], [])
-            else:
-                form_line(f, d_fasta, i, [], ntmd[-1])
+            print(i[1])
+            tmd, ntmd= get_topo(i[0], i[1])
+            print(tmd)
+            # for tmdom, ntmdom in zip(tmd, ntmd):
+            #     form_line(f, d_fasta, i, tmdom, ntmdom)
+            # if len(tmd) == len(ntmd):
+            #     continue
+            # if len(tmd) > len(ntmd):
+            #     form_line(f, d_fasta, i, tmd[-1], [])
+            # else:
+            #     form_line(f, d_fasta, i, [], ntmd[-1])
             
 def print_topology():
     for i in topology:
