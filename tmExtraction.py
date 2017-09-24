@@ -29,31 +29,38 @@ def fasta_parser(file_name):
             l = line.split('|')
             fasta_genes.append((l[0].strip(' '), re.sub('\n', '', re.sub(r'length=[0-9]*\n', '', l[-1]))))
 
-def get_bounds(s, tok):
+def get_bounds(s):
     part = s.partition('-')
-    left = part[0]
-    right = part[2].partition(tok)[0]
-    return (left, right)
+    return (int(part[0]), int(part[2]))
     
 
+# def get_topo(name, topo):
+#     tmd = []
+#     ntmd = [()]
+#     for i in range(0, len(topo)):
+#         if topo[i] == 'o':
+#             left, right = get_bounds(topo[i + 1:], 'i')
+#             if (left != '' and right != ''):
+#                 ntmd.append((int(left), int(right)))
+#             else:
+#                 tmd.append(((tmd[-1][1][1], general_file_data[name][0]), ()))
+#         if topo[i] == 'i':
+#             left, right = get_bounds(topo[i + 1:], 'o')
+#             if (left != '' and right != ''):
+#                 tmd.append((ntmd[-1], (int(left), int(right))))
+#             else:
+#                 tmd.append(((ntmd[-1]), (ntmd[-1][1], general_file_data[name][0])))
+#     return tmd, ntmd
+
 def get_topo(name, topo):
-    tmd = []
-    ntmd = [()]
-    for i in range(0, len(topo)):
-        if topo[i] == 'o':
-            left, right = get_bounds(topo[i + 1:], 'i')
-            if (left != '' and right != ''):
-                ntmd.append((int(left), int(right)))
-            else:
-                tmd.append(((tmd[-1][1][1], general_file_data[name][0]), ()))
-        if topo[i] == 'i':
-            left, right = get_bounds(topo[i + 1:], 'o')
-            if (left != '' and right != ''):
-                tmd.append((ntmd[-1], (int(left), int(right))))
-            else:
-#                print(topo, tmd[-1][1], general_file_data[name][0])
-                tmd.append(((ntmd[-1]), (ntmd[-1][1], general_file_data[name][0])))
-    return tmd, ntmd
+    tmd = [()]
+    for d in re.findall("[io]([0-9]*-[0-9]*)", topo):
+        left, right = get_bounds(d)
+        if tmd[-1] is ():
+            tmd.append((1, left - 1, left, right))
+        else:
+            tmd.append((tmd[-1][3] + 1, right - 1, left, right))
+    return tmd
 
 def get_prot_seq(d_fasta, name, bounds):
     return d_fasta[name][bounds[0]:bounds[1]]
@@ -73,8 +80,7 @@ def create_csv(file_name):
         f.write('[ID]' + '\t' + '[TOPOLOGY]' + '\t' + '[TMD #]' + '\t' + '[TMD protein sequence]' + '\t'
                 + '[NON TMD #]' + '\t' + '[NON TMD protein sequence]\n')
         for i in topology:
-            print(i[1])
-            tmd, ntmd= get_topo(i[0], i[1])
+            tmd = get_topo(i[0], i[1])
             print(tmd)
             # for tmdom, ntmdom in zip(tmd, ntmd):
             #     form_line(f, d_fasta, i, tmdom, ntmdom)
