@@ -2,6 +2,7 @@
 import os
 import re
 import time
+import fileinput
 
 timestr = time.strftime("%Y-%m-%d")
 
@@ -34,7 +35,8 @@ def get_bounds(s):
     return (int(part[0]), int(part[2]))
     
 def get_tmd(name, topo):
-    tmd = [()]# 0 = precedent lbound; 1 = suiv upbound; 2 = current lbound; 3 = current upbound
+    # 0 = precedent lbound; 1 = suiv upbound; 2 = current lbound; 3 = current upbound
+    tmd = [()]
     for d in re.findall("[io]([0-9]*-[0-9]*)", topo):
         left, right = get_bounds(d)
         if tmd[-1] is ():
@@ -81,15 +83,6 @@ def create_csv(file_name):
             if general_file_data[i[0]][0] > upbound:
                 create_last_ntmd(f, d_fasta, i, upbound)
                 f.write('\n')
-
-            
-def print_topology():
-    for i in topology:
-        print(i)
-
-def print_fasta():
-    for i in fasta_genes:
-        print(i)
 
 fasta_parser('liverStageGenes-wp')
 topology_parser('TopologyPbLs')
