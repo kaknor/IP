@@ -7,9 +7,10 @@ import fileinput
 timestr = time.strftime("%Y-%m-%d")
 
 general_file_data = {}
+fasta_genes = {}
+
 topology = []
 
-fasta_genes = []
 
 def topology_parser(file_name):
     with open(os.path.join('inputTopologyFiles', file_name + '.csv'), 'r') as f:
@@ -24,11 +25,12 @@ def topology_parser(file_name):
     create_csv(file_name)
 
 def fasta_parser(file_name):
+    fasta_pattern = r'Invalid IDs:|PBANKA_[MITAP]*[0-9]*|length=[0-9]*|\n|'
     with open(os.path.join('../stageGenes-wp', file_name), 'r') as f:
         lines = f.read().split('>')
         for line in lines:
             l = line.split('|')
-            fasta_genes.append((l[0].strip(' '), re.sub('\n', '', re.sub(r'length=[0-9]*\n', '', l[-1]))))
+            fasta_genes[l[0].strip(' ')] = (re.sub('\n', '', re.sub(r'length=[0-9]*\n', '', l[-1])))
 
 def get_bounds(s):
     part = s.partition('-')
@@ -46,10 +48,12 @@ def get_tmd(name, topo):
     return tmd
 
 def get_prot_seq(d_fasta, name, bounds):
+    res = ''
     if general_file_data[name][0] == bounds[1]:
-        return d_fasta[name][bounds[0]:]
+        res = d_fasta[name][bounds[0]:]
     else:
-        return d_fasta[name][bounds[0]:bounds[1] + 1]
+        res = d_fasta[name][bounds[0]:bounds[1] + 1]
+    return res
 
 def create_line(f, d_fasta, i, tmd):
     f.write(i[0] + '\t')
@@ -83,6 +87,7 @@ def create_csv(file_name):
             if general_file_data[i[0]][0] > upbound:
                 create_last_ntmd(f, d_fasta, i, upbound)
                 f.write('\n')
+    print(d_fasta["PBANKA_MIT01900"])
 
 fasta_parser('liverStageGenes-wp')
 topology_parser('TopologyPbLs')
