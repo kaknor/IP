@@ -25,12 +25,13 @@ def topology_parser(file_name):
     create_csv(file_name)
 
 def fasta_parser(file_name):
+    #if fasta matching is wrong pb is most likely there
     fasta_pattern = r'Invalid IDs:|PBANKA_[MITAP]*[0-9]*|length=[0-9]*|\n|'
     with open(os.path.join('../stageGenes-wp', file_name), 'r') as f:
         lines = f.read().split('>')
         for line in lines:
             l = line.split('|')
-            fasta_genes[l[0].strip(' ')] = (re.sub('\n', '', re.sub(r'length=[0-9]*\n', '', l[-1])))
+            fasta_genes[l[0].strip(' ')] = (re.sub(fasta_pattern, '', l[-1]))
 
 def get_bounds(s):
     part = s.partition('-')
