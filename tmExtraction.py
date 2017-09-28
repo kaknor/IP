@@ -23,8 +23,6 @@ def topology_parser(file_name):
             #0 = id; 1 = len; 2 = ; 3 =; 4 =; 5 = topology
             general_file_data[l[0]] = (length, l[2], l[3], l[4], topo)
             topology.append((l[0].strip(' '), topo))
-            if l[0] == 'PF3D7_1437100':
-                print(topology[-1])
     create_csv(file_name)
 
 def fasta_parser(file_name):
@@ -81,15 +79,10 @@ def create_last_ntmd(f, fasta_genes, i, lbound):
     f.write(seq + '\t')
     
 def create_csv(file_name):
-    d_topology = dict(topology)
-    print(topology)
-    print(d_topology['PF3D7_1437100'])
     with open('outputTopologyFiles/' + file_name + '_' + timestr + '.csv', 'w') as f:
         f.write('[ID]' + '\t' + '[TOPOLOGY]' + '\t' + '[TMD #]' + '\t' + '[TMD protein sequence]' + '\t'
                 + '[NON TMD #]' + '\t' + '[NON TMD protein sequence]\n')
         for i in topology:
-            # if i[0] == 'PF3D7_1437100':
-            #     print('hey')
             tmd = get_tmd(i[0], i[1])[1:]
             for d in tmd:
                 create_line(f, fasta_genes, i, d)
